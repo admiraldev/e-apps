@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Http\Requests\StorePostRequest;
+use App\Http\Requests\UpdatePostRequest;
+
 
 class PostController extends Controller
 {
@@ -19,20 +22,9 @@ class PostController extends Controller
         return view('posts.create');
     }
 
-    public function store(Request $request)
+    public function store(StorePostRequest $request)
     {
-        $this->validate($request, [
-            'title' => 'required|string|max:155',
-            'content' => 'required',
-            'status' => 'required'
-        ]);
-
-        $post = Post::create([
-            'title' => $request->title,
-            'content' => $request->content,
-            'status' => $request->status,
-            'slug' => Str::slug($request->title)
-        ]);
+        $post = Post::create($request->validated() + ['slug' => Str::slug($request->title)]);
 
         if ($post) {
             return redirect()
@@ -56,22 +48,11 @@ class PostController extends Controller
         return view('posts.edit', compact('post'));
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdatePostRequest $request, $id)
     {
-        $this->validate($request, [
-            'title' => 'required|string|max:155',
-            'content' => 'required',
-            'status' => 'required'
-        ]);
-
         $post = Post::findOrFail($id);
 
-        $post->update([
-            'title' => $request->title,
-            'content' => $request->content,
-            'status' => $request->status,
-            'slug' => Str::slug($request->title)
-        ]);
+        $post->update($request->validated() + ['slug' => Str::slug($request->title)]);
 
         if ($post) {
             return redirect()
